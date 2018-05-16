@@ -1,0 +1,241 @@
+---
+swagger: '2.0'
+################################################################################
+#                       API Information                                        #
+################################################################################
+info:
+  version: "1.0"
+  title:  Sample API
+  description: Sample API
+
+  x-technicalOwner:                             # Technical Owner of the API
+    name: 
+    url: 
+    email: 
+
+  x-supportTeam:                                
+    name:
+    email:
+    remedySupportGroupName: 
+    url: 
+
+  x-SLA:                                        #Availability, Support hours, TPS etc.
+    maxTPS: 5                                   #Maximum TPS supported overall (not per consumer).
+    availability: 24X7                          #e.g. 24X7
+    max95ResponseTimeMs: 1000                   #maximum response time in milliseconds for 95th percentile
+
+  x-detailedTechnicalDesignURL: 
+ 
+
+################################################################################
+#                  Host, Base Path, Schemes and Content Types                  #
+################################################################################
+host: 'localhost:8080'
+basePath: /com/chandra/microservice/v1
+schemes:
+  - http
+produces:
+  - application/json
+consumes:
+  - application/json
+
+################################################################################
+#                                  Security                                    #
+################################################################################
+securityDefinitions:
+
+  # API Key based Authentication
+  API Key:
+    type: basic
+    description: The API consumer is expected to present the API key and secret (password) to access this API. The API key needs to be presented as part of standard HTTP Authorization header.
+
+security:
+  - API Key: []
+
+################################################################################
+#                                   Parameters                                 #
+################################################################################
+parameters:
+  x-messageId:
+    name: x-messageId
+    in: header
+    description: Globally unique message identifier  - GUID. This uniquely identifies this call.
+    type: string
+    required: true
+  x-appCorrelationId:
+    name: x-appCorrelationId
+    in: header
+    description: Consumer generated message identifier for correlation purposes. e.g. Can be used to group together a number of API calls making up a business transaction.
+    type: string
+    required: true
+  x-organisationId:
+    name: x-organisationId
+    in: header
+    description: The organisation the caller is operating in.
+    type: string
+    required: true
+    enum:
+      - CHANDRA
+  
+################################################################################
+#                      Paths                                                   #
+################################################################################
+paths:
+  /users:
+    get:
+      tags:
+        - User details
+      description: retrieve all users
+      operationId: getUsersList
+      parameters:
+        - $ref: '#/parameters/x-messageId'
+        - $ref: '#/parameters/x-appCorrelationId'
+        - $ref: '#/parameters/x-organisationId'
+      responses:
+      #Success
+        200:
+          $ref: '#/responses/200UsersListResponse'
+        # if any of the headers values are not valid
+        400:
+          $ref: '#/responses/400ErrorResponse'
+        404:
+          $ref: '#/responses/404ErrorResponse'
+        # Server Errors
+        500:
+          $ref: '#/responses/500ErrorResponse'
+          
+  /addUser:
+    post:
+      tags:
+        - Add User details
+      description: Add new user details
+      operationId: addUser
+      parameters:
+        - $ref: '#/parameters/x-messageId'
+        - $ref: '#/parameters/x-appCorrelationId'
+        - $ref: '#/parameters/x-organisationId'
+        - in: body
+          name: user
+          description: The user to create.
+          schema:
+            $ref: "#/definitions/UsersDetailsResponse"  
+       
+      responses:
+      #Success
+        200:
+          description: OK
+          schema:
+            type: boolean
+        400:
+          $ref: '#/responses/400ErrorResponse'
+        404:
+          $ref: '#/responses/404ErrorResponse'
+          # Server Errors
+        500:
+          $ref: '#/responses/500ErrorResponse'
+
+  /healthcheck:
+    get:
+      tags:
+        - getHealthCheckStatus
+      description: retrieves HealthCheck Summary of API.
+      operationId: getHealthCheckStatus
+      responses:
+        #Success
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              status:
+                type: string                        #status should be 'Success'
+                enum:
+                  - success
+
+################################################################################
+#                           Responses                                          #
+################################################################################
+responses:
+  200UsersListResponse:
+    description: UsersList response
+    schema:
+      type: array
+      items:
+       $ref: '#/definitions/UsersDetailsResponse'
+  # Client Error Responses
+  400ErrorResponse:
+    description: Bad Request
+    schema:
+      type: object
+      properties:
+        result:
+          type: object
+          properties:
+            errors:
+              type: array
+              items:
+                $ref: '#/definitions/Error'
+  # Code not found
+  404ErrorResponse:
+    description: Resource Not Found
+    schema:
+      type: object
+      properties:
+        result:
+          type: object
+          properties:
+            errors:
+              type: array
+              items:
+                $ref: '#/definitions/Error'
+  # Server Error Responses
+  500ErrorResponse:
+    description: Internal Server Error
+    schema:
+      type: object
+      properties:
+        result:
+          type: object
+          properties:
+            errors:
+              type: array
+              items:
+                $ref: '#/definitions/Error'
+
+################################################################################
+#                           Definitions                                        #
+################################################################################
+
+definitions:
+
+  UsersDetailsResponse:
+    type: object
+    description: campaign offer response object.
+    properties:
+      userid:
+        type: string
+        description: user id
+      username:
+        type: string
+        description: user name
+      gender:
+        type: string
+        description: gender of the user
+      occupation:
+        type: string
+        description: occupation name of the user
+      
+  Error:
+    description: Represent an individual error.
+    type: object
+    properties:
+      code:
+        description: Error Code.
+        type: integer
+        format: int32
+      message:
+        description: Error Message
+        type: string
+      fields:
+        description: 'Comma separated list of fields, which caused the error condition.'
+        type: string

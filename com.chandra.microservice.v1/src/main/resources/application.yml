@@ -1,0 +1,27 @@
+
+# 1.0 Spring Configurations          
+###########################
+spring:
+  application:
+    name: com-chandra-microservice-v1-api
+  jmx:
+    enabled: false
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.web.ErrorMvcAutoConfiguration
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+  profiles:
+    active: ${API_SVC_ENV}
+logging:
+  #file: /com-chandra-microservice-v1-api.log
+  pattern:
+    console: "%d %-5level %logger : %msg%n"
+  level:
+    org.springframework.web: INFO
+    org.springframework.boot: INFO
+    org.springframework.beans: ERROR
+    com.chandra.microservice: DEBUG
+
+env.properties.path: classpath:/test/env.properties
+secret.properties.path: classpath:/test/secret.properties
