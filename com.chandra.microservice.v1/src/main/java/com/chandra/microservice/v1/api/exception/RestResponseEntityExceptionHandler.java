@@ -31,4 +31,5 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
 	public ResponseEntity<InlineResponse400> handleUserServiceException(Exception ex, WebRequest request) {
 		return ApiUtility.prepareErrorResponse(ex.getMessage(), 105, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
+	
 }
